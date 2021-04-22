@@ -1,20 +1,23 @@
 #!/bin/bash
 sudo yum update -y
-sudo chown -R ec2-user:ec2-user /opt
 cd /opt
-sudo yum install git -y
-git clone https://github.com/sriison/srini-petclinic.git
 sudo wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u282-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u282b08.tar.gz
+sudo wget https://apachemirror.wuchna.com/maven/maven-3/3.8.1/binaries/apache-maven-3.8.1-bin.tar.gz
+sudo wget https://apachemirror.wuchna.com/tomcat/tomcat-8/v8.5.65/bin/apache-tomcat-8.5.65.tar.gz
+sudo yum install git -y
+sudo git clone https://github.com/sriison/srini-petclinic.git
 sudo tar -zxvf OpenJDK8U-jdk_x64_linux_hotspot_8u282b08.tar.gz
-mv jdk8u282-b08 java8
-echo "export JAVA_HOME=/opt/java8" >>/etc/profile
-echo "export PATH=$PATH:/opt/java8/bin">>/etc/profile
+sudo mv jdk8u282-b08 java8
+sudo tar -zxvf apache-tomcat-8.5.65.tar.gz
+sudo mv apache-tomcat-8.5.65 tomcat8
+sudo tar -zxvf apache-maven-3.8.1-bin.tar.gz
+sudo mv apache-maven-3.8.1 maven3
+sudo chown -R ec2-user:ec2-user /opt
+sudo sed -i '$a export JAVA_HOME=/opt/java8' /etc/profile
+sudo sed -i '$a export PATH=$PATH:/opt/java8/bin' /etc/profile
+sudo sed -i '$a export M2_HOME=/opt/maven3' /etc/profile
+sudo sed -i '$a export PATH=$PATH:/opt/maven3/bin' /etc/profile
 source /etc/profile
-sudo yum install maven -y
-wget https://mirrors.estointernet.in/apache/tomcat/tomcat-8/v8.5.65/bin/apache-tomcat-8.5.65.tar.gz
-sudo tar -zxvf apache-tomcat-8.5.63.tar.gz
-mv apache-tomcat-8.5.63 tomcat8
-cd /opt/srini-petclinic/
-mvn clean package
+cd /opt/srini-petclinic/ && mvn clean package
 cp /opt/srini-petclinic/target/petclinic.war /opt/tomcat8/webapps/
 sh /opt/tomcat8/bin/startup.sh
